@@ -27,7 +27,8 @@ use overload
   '*'  => \&intersection,
   '-'  => \&difference,
   '%'  => \&symmetric_difference,
-  '/'  => \&unique;
+  '/'  => \&unique,
+  '==' => \&is_equal;
 
 =head1 CONSTRUCTORS
 
@@ -236,6 +237,21 @@ sub unique {
       bless [ sort grep { $counts{$_} == 1 } values %members ],
       ref $self;
     return $unique;
+}
+
+=head1 COMPARING
+
+=head2 is_equal
+
+=cut
+
+sub is_equal {
+    my ( $self, $set ) = @_;
+    return unless ( @$self == @$set );
+    for ( my $i = 0 ; $i < @$self ; $i++ ) {
+        return unless ( $self->[$i] eq $set->[$i] );
+    }
+    return 1;
 }
 
 =head1 AUTHOR
