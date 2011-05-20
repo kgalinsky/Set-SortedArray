@@ -21,7 +21,13 @@ use version; our $VERSION = qv('0.0.1');
 
 =cut
 
-use overload '""' => \&as_string, '+' => \&union, '*' => \&intersection;
+use overload
+  '""' => \&as_string,
+  '+'  => \&union,
+  '*'  => \&intersection,
+  '-'  => \&difference,
+  '%'  => \&symmetric_difference,
+  '/'  => \&unique;
 
 =head1 CONSTRUCTORS
 
@@ -212,6 +218,25 @@ sub asymmetric_difference {
 =head2 unique
 
 =cut
+
+sub unique {
+    my $self = shift;
+
+    my %members;
+    my %counts;
+
+    foreach my $set ( $self, @_ ) {
+        foreach my $member (@$set) {
+            $members{$member} ||= $member;
+            $counts{$member}++;
+        }
+    }
+
+    my $unique =
+      bless [ sort grep { $counts{$_} == 1 } values %members ],
+      ref $self;
+    return $unique;
+}
 
 =head1 AUTHOR
 
