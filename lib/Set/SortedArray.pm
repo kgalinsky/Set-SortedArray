@@ -50,7 +50,7 @@ use version; our $VERSION = qv('0.0.1');
     $pS = $s > $t;  # is_proper_superset
     $is = $s <= $t; # is_subset
     $iS = $s >= $t; # is_superset
-    
+
     # amalgam of a few of the above
     $cmp = $s->compare($t);
     $cmp = $s <=> $t;
@@ -113,8 +113,13 @@ TODO
 =head1 DISPLAYING
 
 =head2 as_string
+
     print $s->as_string, "\n";
     print $s, "\n";
+
+=head2 as_string_callback
+
+    Set::SortedArray->as_string_callback(sub { ... });
 
 =cut
 
@@ -124,8 +129,6 @@ sub as_string { return '(' . join( ' ', @{ $_[0]->_members } ) . ')' }
 
 sub as_string_callback {
     my ( $class, $callback ) = @_;
-    $class = ref $class || $class;
-
     no strict 'refs';
     no warnings;
     *{"${class}::as_string"} = $callback;
