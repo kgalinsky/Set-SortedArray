@@ -59,14 +59,19 @@ optimized for speed and memory footprint.
 =cut
 
 use overload
-  '""' => \&_as_string,
-  '+'  => \&union,
-  '*'  => \&intersection,
-  '-'  => \&difference,
-  '%'  => \&symmetric_difference,
-  '/'  => \&unique,
-  '==' => \&is_equal,
-  '!=' => \&is_disjoint;
+  '""'  => \&_as_string,
+  '+'   => \&union,
+  '*'   => \&intersection,
+  '-'   => \&difference,
+  '%'   => \&symmetric_difference,
+  '/'   => \&unique,
+  '=='  => \&is_equal,
+  '!='  => \&is_disjoint,
+  '<'   => \&is_proper_subset,
+  '>'   => \&is_proper_superset,
+  '<='  => \&is_subset,
+  '>='  => \&is_superset,
+  '<=>' => \&compare;
 
 =head1 CONSTRUCTORS
 
@@ -323,6 +328,11 @@ sub unique {
 sub is_equal {
     my ( $this, $that ) = map { $_->_members } @_[ 0, 1 ];
     return unless ( @$this == @$that );
+    return is_equal( $this, $that );
+}
+
+sub _is_equal {
+    my ( $this, $that ) = @_;
     for ( my $i = 0 ; $i < @$this ; $i++ ) {
         return unless ( $this->[$i] eq $that->[$i] );
     }
@@ -418,10 +428,34 @@ sub _is_subset {
     return $i == @$this;
 }
 
+=head2 compare
+
+    $cmp = $s->compare($t);
+    $cmp = $s <=> $t;
+
+C<compare> returns:
+
+    0  if $s == $t
+    1  if $s > $t
+    -1 if $s < $t
+    () otherwise
+
+=cut
+
+sub compare {
+    my ( $this, $that ) = map { $_->members } @_[ 0, 1 ];
+
+    if ( my $cmp = @$this <=> @$that ) {
+        return $cmp == 1
+          ? ( _is_subset( $that, $this ) ? 1 : () )
+          : ( _is_subset( $this, $that ) ? -1 : () );
+    }
+    else { return _is_equal( $this, $that ) }
+}
+
 =head1 AUTHOR
 
 "Kevin Galinsky", C<kgalinsky plus cpan at gmail dot com>
-
 =head1 BUGS
 
 Please report any bugs or feature requests to C<bug-set-sortedarray at rt.cpan.org>, or through
