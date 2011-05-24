@@ -195,24 +195,24 @@ sub intersection {
 =cut
 
 sub difference {
-    my ( $self, $set ) = map { $_->_members } @_[ 0, 1 ];
+    my ( $this, $that ) = map { $_->_members } @_[ 0, 1 ];
 
     my $i = 0;
     my $j = 0;
 
     my $difference = [];
-    while ( ( $i < @$self ) && ( $j < @$set ) ) {
-        my $member_i = $self->[$i];
-        my $member_j = $set->[$j];
+    while ( ( $i < @$this ) && ( $j < @$that ) ) {
+        my $member_i = $this->[$i];
+        my $member_j = $that->[$j];
 
         if ( $member_i eq $member_j ) { $i++; $j++ }
         elsif ( $member_i lt $member_j ) { push @$difference, $member_i; $i++ }
         else                             { $j++ }
     }
 
-    push @$difference, @$self[ $i .. $#$self ];
+    push @$difference, @$this[ $i .. $#$this ];
 
-    my $class = ref($self);
+    my $class = ref($this);
     bless $difference, $class;
 
     return $difference;
@@ -226,25 +226,25 @@ sub difference {
 =cut
 
 sub symmetric_difference {
-    my ( $self, $set ) = map { $_->_members } @_[ 0, 1 ];
+    my ( $this, $that ) = map { $_->_members } @_[ 0, 1 ];
 
     my $i = 0;
     my $j = 0;
 
     my $difference = [];
-    while ( ( $i < @$self ) && ( $j < @$set ) ) {
-        my $member_i = $self->[$i];
-        my $member_j = $set->[$j];
+    while ( ( $i < @$this ) && ( $j < @$that ) ) {
+        my $member_i = $this->[$i];
+        my $member_j = $that->[$j];
 
         if ( $member_i eq $member_j ) { $i++; $j++ }
         elsif ( $member_i lt $member_j ) { push @$difference, $member_i; $i++ }
         else                             { push @$difference, $member_j; $j++ }
     }
 
-    push @$difference, @$self[ $i .. $#$self ];
-    push @$difference, @$set[ $j .. $#$set ];
+    push @$difference, @$this[ $i .. $#$this ];
+    push @$difference, @$that[ $j .. $#$that ];
 
-    my $class = ref($self);
+    my $class = ref($this);
     bless $difference, $class;
 
     return $difference;
@@ -259,25 +259,25 @@ Returns [ $s - $t, $t - $s ], but more efficiently.
 =cut
 
 sub asymmetric_difference {
-    my ( $self, $set ) = map { $_->_members } @_[ 0, 1 ];
+    my ( $this, $that ) = map { $_->_members } @_[ 0, 1 ];
 
     my $i = 0;
     my $j = 0;
 
     my ( $difference, $add ) = ( [], [] );
-    while ( ( $i < @$self ) && ( $j < @$set ) ) {
-        my $member_i = $self->[$i];
-        my $member_j = $set->[$j];
+    while ( ( $i < @$this ) && ( $j < @$that ) ) {
+        my $member_i = $this->[$i];
+        my $member_j = $that->[$j];
 
         if ( $member_i eq $member_j ) { $i++; $j++ }
         elsif ( $member_i lt $member_j ) { push @$difference, $member_i; $i++ }
         else                             { push @$add,        $member_j; $j++ }
     }
 
-    push @$difference, @$self[ $i .. $#$self ];
-    push @$add,        @$set[ $j .. $#$set ];
+    push @$difference, @$this[ $i .. $#$this ];
+    push @$add,        @$that[ $j .. $#$that ];
 
-    my $class = ref($self);
+    my $class = ref($this);
     bless $difference, $class;
     bless $add,        $class;
 
@@ -319,10 +319,10 @@ sub unique {
 =cut
 
 sub is_equal {
-    my ( $self, $set ) = map { $_->_members } @_[ 0, 1 ];
-    return unless ( @$self == @$set );
-    for ( my $i = 0 ; $i < @$self ; $i++ ) {
-        return unless ( $self->[$i] eq $set->[$i] );
+    my ( $this, $that ) = map { $_->_members } @_[ 0, 1 ];
+    return unless ( @$this == @$that );
+    for ( my $i = 0 ; $i < @$this ; $i++ ) {
+        return unless ( $this->[$i] eq $that->[$i] );
     }
     return 1;
 }
