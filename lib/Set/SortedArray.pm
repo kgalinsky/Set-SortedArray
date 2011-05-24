@@ -17,12 +17,31 @@ use version; our $VERSION = qv('0.0.1');
 
 =head1 SYNOPSIS
 
+    use Set::SortedArray;
+    my $s = Set::SortedArray->new( qw/ d b c a e /);
+    my $t = Set::SortedArray->new_presorted( qw/ b c e f g / );
+
+    print $s->as_string, "\n";
+    print $s, "\n";
+
+    $u = $s->union($t);
+    $i = $s->intersection($t);
+    $d = $s->difference($t);
+    $e = $s->symmetric_difference($t);
+    $v = $s->unique($t);
+
+    $u = $s + $t;  # union
+    $i = $s * $t;  # intersection
+    $d = $s - $t;  # difference
+    $e = $s % $t;  # symmetric_difference
+    $v = $s / $t;  # unique
+
 =head2 DESCRIPTION
 
 =cut
 
 use overload
-  '""' => \&as_string,
+  '""' => \&_as_string,
   '+'  => \&union,
   '*'  => \&intersection,
   '-'  => \&difference,
@@ -39,7 +58,7 @@ use overload
 
 =head2 new_presorted
 
-    $set = Set::SortedArray->new_presorted(@_);
+    $set = Set::SortedArray->new_presorted(@members);
 
 Quicker than new, but doesn't sort data.
 
@@ -66,13 +85,23 @@ TODO
 =head1 DISPLAYING
 
 =head2 as_string
-
     print $s->as_string, "\n";
     print $s, "\n";
 
 =cut
 
-sub as_string { return join '', @{ $_[0] } }
+sub _as_string { shift->as_string(@_) }
+
+sub as_string { return '(' . join( ' ', @{ $_[0]->_members } ) . ')' }
+
+sub as_string_callback {
+    my ( $class, $callback ) = @_;
+    $class = ref $class || $class;
+
+    no strict 'refs';
+    no warnings;
+    *{"${class}::as_string"} = $callback;
+}
 
 =head1 QUERYING
 
