@@ -50,11 +50,15 @@ use version; our $VERSION = qv('0.0.1');
     $pS = $s > $t;  # is_proper_superset
     $is = $s <= $t; # is_subset
     $iS = $s >= $t; # is_superset
+    
+    # amalgam of a few of the above
+    $cmp = $s->compare($t);
+    $cmp = $s <=> $t;
 
 =head2 DESCRIPTION
 
 Create a set that is stored as a sorted array. Similar to Set::Scalar, except
-optimized for speed and memory footprint.
+optimized for speed and memory.
 
 =cut
 
@@ -450,7 +454,7 @@ sub compare {
           ? ( _is_subset( $that, $this ) ? 1 : () )
           : ( _is_subset( $this, $that ) ? -1 : () );
     }
-    else { return _is_equal( $this, $that ) }
+    else { return _is_equal( $this, $that ) ? 0 : () }
 }
 
 =head1 AUTHOR
