@@ -6,7 +6,7 @@ use Module::Build;
 my $builder = Module::Build->new(
     module_name         => 'Set::SortedArray',
     license             => 'perl',
-    dist_author         => q{"Kevin Galinsky" <"galinsky@broadinstitute.org">},
+    dist_author         => q{"Kevin Galinsky" <"kgalinsky plus cpan at gmail dot com">},
     dist_version_from   => 'lib/Set/SortedArray.pm',
     build_requires => {
         'Test::More' => 0,
