@@ -28,15 +28,23 @@ use version; our $VERSION = qv('0.0.1');
     $i = $s->intersection($t);
     $d = $s->difference($t);
     $e = $s->symmetric_difference($t);
+    $a = $s->asymmetric_difference($t);
     $v = $s->unique($t);
 
-    $u = $s + $t;  # union
-    $i = $s * $t;  # intersection
-    $d = $s - $t;  # difference
-    $e = $s % $t;  # symmetric_difference
-    $v = $s / $t;  # unique
+    $u = $s + $t;   # union
+    $i = $s * $t;   # intersection
+    $d = $s - $t;   # difference
+    $e = $s % $t;   # symmetric_difference
+    $v = $s / $t;   # unique
+    
+    $eq = $s->is_equal($t);
+    
+    $s == $t;       # equal
 
 =head2 DESCRIPTION
+
+Create a set that is stored as a sorted array. Similar to Set::Scalar, except
+optimized for speed and memory footprint.
 
 =cut
 
