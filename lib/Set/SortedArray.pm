@@ -38,12 +38,14 @@ use version; our $VERSION = qv('0.0.1');
     $v = $s / $t;   # unique
 
     $eq = $s->is_equal($t);
+    $dj = $s->is_disjoint($t);
     $ps = $s->is_proper_subset($t);
     $pS = $s->is_proper_superset($t);
     $is = $s->is_subset($t);
     $iS = $s->is_superset($t);
 
-    $s == $t;       # equal
+    $eq = $s == $t; # equal
+    $dj = $s != $t; # disjoint
     $ps = $s < $t;  # is_proper_subset
     $pS = $s > $t;  # is_proper_superset
     $is = $s <= $t; # is_subset
