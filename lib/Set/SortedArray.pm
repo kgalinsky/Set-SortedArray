@@ -335,12 +335,21 @@ sub is_equal {
 =cut
 
 sub is_disjoint {
-    my ( $self, $set ) = map { $_->_members } @_[ 0, 1 ];
-    return 1 unless ( @$self == @$set );
-    for ( my $i = 0 ; $i < @$self ; $i++ ) {
-        return 1 unless ( $self->[$i] eq $set->[$i] );
+    my ( $this, $that ) = map { $_->_members } @_[ 0, 1 ];
+
+    my $i = 0;
+    my $j = 0;
+
+    while ( ( $i < @$this ) && ( $j < @$that ) ) {
+        my $member_i = $this->[$i];
+        my $member_j = $that->[$j];
+
+        if ( $member_i eq $member_j ) { return }
+        elsif ( $member_i lt $member_j ) { $i++ }
+        else                             { $j++ }
     }
-    return;
+
+    return 1;
 }
 
 =head2 is_proper_subset
