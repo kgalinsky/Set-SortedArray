@@ -82,41 +82,53 @@ sub as_string { return join '', @{ $_[0] } }
 
 =cut
 
-sub members { return @{ $_[0] } }
-sub size    { return scalar @{ $_[0] } }
+sub members  { return @{ $_[0] } }
+sub _members { return $_[0] }               # return arrayref of members
+sub size     { return scalar @{ $_[0] } }
 
 =head1 DERIVING
 
 =head2 union
 
+    $u = $s->union($t);
+    $u = $s->union($t, $v);
+    $u = $s + $t;
+    $u = $s + $t + $v; # inefficient
+
 =cut
 
 sub union {
-    my $self = shift;
-    my %members;
+    pop unless ( UNIVERSAL::can( $_[-1], '_members' ) );
 
-    foreach my $set ( $self, @_ ) {
+    my %members;
+    foreach my $set ( map { $_->_members } @_ ) {
         foreach my $member (@$set) {
             $members{$member} ||= $member;
         }
     }
 
-    my $union = bless [ sort values %members ], ref($self);
+    my $union = bless [ sort values %members ], ref( $_[0] );
     return $union;
 }
 
 =head2 intersection
 
+    $i = $s->intersection($t);
+    $i = $s->intersection($t, $u);
+    $i = $s * $t;
+    $i = $s * $t * $u; # inefficient
+
 =cut
 
 sub intersection {
+    pop unless ( UNIVERSAL::can( $_[-1], '_members' ) );
+
     my $total = @_;
-    my $self  = shift;
 
     my %members;
     my %counts;
 
-    foreach my $set ( $self, @_ ) {
+    foreach my $set ( map { $_->_members } @_ ) {
         foreach my $member (@$set) {
             $members{$member} ||= $member;
             $counts{$member}++;
@@ -125,16 +137,19 @@ sub intersection {
 
     my $intersection =
       bless [ sort grep { $counts{$_} == $total } values %members ],
-      ref $self;
+      ref $_[0];
     return $intersection;
 }
 
 =head2 difference
 
+    $d = $s->difference($t);
+    $d = $s - $t;
+
 =cut
 
 sub difference {
-    my ( $self, $set ) = @_;
+    my ( $self, $set ) = map { $_->_members } @_[ 0, 1 ];
 
     my $i = 0;
     my $j = 0;
@@ -159,10 +174,13 @@ sub difference {
 
 =head2 symmetric_difference
 
+    $e = $s->symmetric_difference($t);
+    $e = $s % $t;
+
 =cut
 
 sub symmetric_difference {
-    my ( $self, $set ) = @_;
+    my ( $self, $set ) = map { $_->_members } @_[ 0, 1 ];
 
     my $i = 0;
     my $j = 0;
@@ -188,10 +206,14 @@ sub symmetric_difference {
 
 =head2 asymmetric_difference
 
+    $a = $s->asymmetric_difference($t);
+
+Returns [ $s - $t, $t - $s ], but more efficiently.
+
 =cut
 
 sub asymmetric_difference {
-    my ( $self, $set ) = @_;
+    my ( $self, $set ) = map { $_->_members } @_[ 0, 1 ];
 
     my $i = 0;
     my $j = 0;
@@ -218,24 +240,26 @@ sub asymmetric_difference {
 
 =head2 unique
 
+    $v = $s->unique($t);
+    $v = $s / $t;
+
 =cut
 
 sub unique {
-    my $self = shift;
+    pop unless ( UNIVERSAL::can( $_[-1], '_members' ) );
 
     my %members;
     my %counts;
 
-    foreach my $set ( $self, @_ ) {
+    foreach my $set ( map { $_->_members } @_ ) {
         foreach my $member (@$set) {
-            $members{$member} ||= $member;
             $counts{$member}++;
         }
     }
 
     my $unique =
       bless [ sort grep { $counts{$_} == 1 } values %members ],
-      ref $self;
+      ref $_[0];
     return $unique;
 }
 
@@ -243,10 +267,13 @@ sub unique {
 
 =head2 is_equal
 
+    $eq = $s->is_equal($t);
+    $eq = $s == $t;
+
 =cut
 
 sub is_equal {
-    my ( $self, $set ) = @_;
+    my ( $self, $set ) = map { $_->_members } @_[ 0, 1 ];
     return unless ( @$self == @$set );
     for ( my $i = 0 ; $i < @$self ; $i++ ) {
         return unless ( $self->[$i] eq $set->[$i] );
@@ -256,7 +283,7 @@ sub is_equal {
 
 =head1 AUTHOR
 
-"Kevin Galinsky", C<< <"galinsky at broadinstitute.org"> >>
+"Kevin Galinsky", C<kgalinsky plus cpan at gmail dot com>
 
 =head1 BUGS
 
@@ -264,15 +291,11 @@ Please report any bugs or feature requests to C<bug-set-sortedarray at rt.cpan.o
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Set-SortedArray>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
 
-
-
-
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
 
     perldoc Set::SortedArray
-
 
 You can also look for information at:
 
@@ -296,9 +319,7 @@ L<http://search.cpan.org/dist/Set-SortedArray/>
 
 =back
 
-
 =head1 ACKNOWLEDGEMENTS
-
 
 =head1 LICENSE AND COPYRIGHT
 
@@ -309,7 +330,6 @@ under the terms of either: the GNU General Public License as published
 by the Free Software Foundation; or the Artistic License.
 
 See http://dev.perl.org/licenses/ for more information.
-
 
 =cut
 
