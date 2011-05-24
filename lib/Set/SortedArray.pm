@@ -332,7 +332,7 @@ sub unique {
 sub is_equal {
     my ( $this, $that ) = map { $_->_members } @_[ 0, 1 ];
     return unless ( @$this == @$that );
-    return is_equal( $this, $that );
+    return _is_equal( $this, $that );
 }
 
 sub _is_equal {
@@ -447,9 +447,9 @@ C<compare> returns:
 =cut
 
 sub compare {
-    my ( $this, $that ) = map { $_->members } @_[ 0, 1 ];
+    my ( $this, $that ) = map { $_->_members } @_[ 0, 1 ];
 
-    if ( my $cmp = @$this <=> @$that ) {
+    if ( my $cmp = $#$this <=> $#$that ) {
         return $cmp == 1
           ? ( _is_subset( $that, $this ) ? 1 : () )
           : ( _is_subset( $this, $that ) ? -1 : () );
@@ -460,6 +460,7 @@ sub compare {
 =head1 AUTHOR
 
 "Kevin Galinsky", C<kgalinsky plus cpan at gmail dot com>
+
 =head1 BUGS
 
 Please report any bugs or feature requests to C<bug-set-sortedarray at rt.cpan.org>, or through
