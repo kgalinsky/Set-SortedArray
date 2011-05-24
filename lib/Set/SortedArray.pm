@@ -36,10 +36,18 @@ use version; our $VERSION = qv('0.0.1');
     $d = $s - $t;   # difference
     $e = $s % $t;   # symmetric_difference
     $v = $s / $t;   # unique
-    
+
     $eq = $s->is_equal($t);
-    
+    $ps = $s->is_proper_subset($t);
+    $pS = $s->is_proper_superset($t);
+    $is = $s->is_subset($t);
+    $iS = $s->is_superset($t);
+
     $s == $t;       # equal
+    $ps = $s < $t;  # is_proper_subset
+    $pS = $s > $t;  # is_proper_superset
+    $is = $s <= $t; # is_subset
+    $iS = $s >= $t; # is_superset
 
 =head2 DESCRIPTION
 
@@ -55,7 +63,8 @@ use overload
   '-'  => \&difference,
   '%'  => \&symmetric_difference,
   '/'  => \&unique,
-  '==' => \&is_equal;
+  '==' => \&is_equal,
+  '!=' => \&is_disjoint;
 
 =head1 CONSTRUCTORS
 
@@ -316,6 +325,86 @@ sub is_equal {
         return unless ( $self->[$i] eq $set->[$i] );
     }
     return 1;
+}
+
+=head2 is_disjoint
+
+    $dj = $s->is_disjoint($t);
+    $dj = $s != $t;
+
+=cut
+
+sub is_disjoint {
+    my ( $self, $set ) = map { $_->_members } @_[ 0, 1 ];
+    return 1 unless ( @$self == @$set );
+    for ( my $i = 0 ; $i < @$self ; $i++ ) {
+        return 1 unless ( $self->[$i] eq $set->[$i] );
+    }
+    return;
+}
+
+=head2 is_proper_subset
+
+    $ps = $s->is_proper_subset($t);
+    $ps = $s < $t;
+
+=head2 is_proper_superset
+
+    $pS = $s->is_proper_superset($t);
+    $pS = $s > $t;
+
+=head2 is_subset
+
+    $is = $s->is_subset($t);
+    $is = $s <= $t;
+
+=head2 is_superset
+
+    $iS = $s->is_superset($t);
+    $iS = $s >= $t;
+
+=cut
+
+sub is_proper_subset {
+    my ( $this, $that ) = map { $_->_members } @_[ 0, 1 ];
+    return unless ( @$this < @$that );
+    return _is_subset( $this, $that );
+}
+
+sub is_proper_superset {
+    my ( $this, $that ) = map { $_->_members } @_[ 0, 1 ];
+    return unless ( @$this > @$that );
+    return _is_subset( $that, $this );
+}
+
+sub is_subset {
+    my ( $this, $that ) = map { $_->_members } @_[ 0, 1 ];
+    return unless ( @$this <= @$that );
+    return _is_subset( $this, $that );
+}
+
+sub is_superset {
+    my ( $this, $that ) = map { $_->_members } @_[ 0, 1 ];
+    return unless ( @$this >= @$that );
+    return _is_subset( $that, $this );
+}
+
+sub _is_subset {
+    my ( $this, $that ) = @_;
+
+    my $i = 0;
+    my $j = 0;
+
+    while ( ( $i < @$this ) && ( $j < @$that ) ) {
+        my $member_i = $this->[$i];
+        my $member_j = $that->[$j];
+
+        if ( $member_i eq $member_j ) { $i++; $j++; }
+        elsif ( $member_i gt $member_j ) { $j++ }
+        else                             { return }
+    }
+
+    return $i == @$this;
 }
 
 =head1 AUTHOR
