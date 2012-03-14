@@ -143,8 +143,8 @@ sub as_string_callback {
 
 =cut
 
-sub members  { return @{ $_[0] } }
-sub size     { return scalar @{ $_[0] } }
+sub members { return @{ $_[0] } }
+sub size    { return scalar @{ $_[0] } }
 
 =head1 DERIVING
 
@@ -161,7 +161,7 @@ sub union {
     pop if ( ( @_ == 3 ) && ( !UNIVERSAL::isa( $_[2], __PACKAGE__ ) ) );
 
     my %members;
-    foreach my $set ( @_ ) {
+    foreach my $set (@_) {
         foreach my $member (@$set) {
             $members{$member} ||= $member;
         }
@@ -188,7 +188,7 @@ sub intersection {
     my %members;
     my %counts;
 
-    foreach my $set ( @_ ) {
+    foreach my $set (@_) {
         foreach my $member (@$set) {
             $members{$member} ||= $member;
             $counts{$member}++;
@@ -216,12 +216,12 @@ sub difference {
 
     my $difference = [];
     while ( ( $i < @$S ) && ( $j < @$T ) ) {
-        my $member_i = $S->[$i];
-        my $member_j = $T->[$j];
+        my $s_i = $S->[$i];
+        my $t_j = $T->[$j];
 
-        if ( $member_i eq $member_j ) { $i++; $j++ }
-        elsif ( $member_i lt $member_j ) { push @$difference, $member_i; $i++ }
-        else                             { $j++ }
+        if ( $s_i eq $t_j ) { $i++; $j++ }
+        elsif ( $s_i lt $t_j ) { push @$difference, $s_i; $i++ }
+        else                   { $j++ }
     }
 
     push @$difference, @$S[ $i .. $#$S ];
@@ -247,12 +247,12 @@ sub symmetric_difference {
 
     my $difference = [];
     while ( ( $i < @$S ) && ( $j < @$T ) ) {
-        my $member_i = $S->[$i];
-        my $member_j = $T->[$j];
+        my $s_i = $S->[$i];
+        my $t_j = $T->[$j];
 
-        if ( $member_i eq $member_j ) { $i++; $j++ }
-        elsif ( $member_i lt $member_j ) { push @$difference, $member_i; $i++ }
-        else                             { push @$difference, $member_j; $j++ }
+        if ( $s_i eq $t_j ) { $i++; $j++ }
+        elsif ( $s_i lt $t_j ) { push @$difference, $s_i; $i++ }
+        else                   { push @$difference, $t_j; $j++ }
     }
 
     push @$difference, @$S[ $i .. $#$S ];
@@ -279,12 +279,12 @@ sub asymmetric_difference {
 
     my ( $difference, $add ) = ( [], [] );
     while ( ( $i < @$S ) && ( $j < @$T ) ) {
-        my $member_i = $S->[$i];
-        my $member_j = $T->[$j];
+        my $s_i = $S->[$i];
+        my $t_j = $T->[$j];
 
-        if ( $member_i eq $member_j ) { $i++; $j++ }
-        elsif ( $member_i lt $member_j ) { push @$difference, $member_i; $i++ }
-        else                             { push @$add,        $member_j; $j++ }
+        if ( $s_i eq $t_j ) { $i++; $j++ }
+        elsif ( $s_i lt $t_j ) { push @$difference, $s_i; $i++ }
+        else                   { push @$add,        $t_j; $j++ }
     }
     push @$difference, @$S[ $i .. $#$S ];
     push @$add,        @$T[ $j .. $#$T ];
@@ -309,7 +309,7 @@ sub unique {
     my %members;
     my %counts;
 
-    foreach my $set ( @_ ) {
+    foreach my $set (@_) {
         foreach my $member (@$set) {
             $counts{$member}++;
         }
@@ -358,12 +358,12 @@ sub is_disjoint {
     my $j = 0;
 
     while ( ( $i < @$S ) && ( $j < @$T ) ) {
-        my $member_i = $S->[$i];
-        my $member_j = $T->[$j];
+        my $s_i = $S->[$i];
+        my $t_j = $T->[$j];
 
-        if ( $member_i eq $member_j ) { return }
-        elsif ( $member_i lt $member_j ) { $i++ }
-        else                             { $j++ }
+        if ( $s_i eq $t_j ) { return }
+        elsif ( $s_i lt $t_j ) { $i++ }
+        else                   { $j++ }
     }
 
     return 1;
@@ -422,12 +422,12 @@ sub _is_subset {
     my $j = 0;
 
     while ( ( $i < @$S ) && ( $j < @$T ) ) {
-        my $member_i = $S->[$i];
-        my $member_j = $T->[$j];
+        my $s_i = $S->[$i];
+        my $t_j = $T->[$j];
 
-        if ( $member_i eq $member_j ) { $i++; $j++; }
-        elsif ( $member_i gt $member_j ) { $j++ }
-        else                             { return }
+        if ( $s_i eq $t_j ) { $i++; $j++; }
+        elsif ( $s_i gt $t_j ) { $j++ }
+        else                   { return }
     }
 
     return $i == @$S;
