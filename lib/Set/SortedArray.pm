@@ -5,15 +5,15 @@ use warnings;
 
 =head1 NAME
 
-Set::SortedArray - sets stored as sorted arrays for speed
+Set::SortedArray - sets stored as sorted arrays
 
 =head1 VERSION
 
-Version 0.0.1
+Version 0.02
 
 =cut
 
-use version; our $VERSION = qv('0.0.1');
+our $VERSION = qv('0.02');
 
 =head1 SYNOPSIS
 
@@ -57,8 +57,8 @@ use version; our $VERSION = qv('0.0.1');
 
 =head2 DESCRIPTION
 
-Create a set that is stored as a sorted array. Similar to Set::Scalar, except
-optimized for speed and memory.
+Create a set that is stored as a sorted array. Modification is currently
+unsupported.
 
 =cut
 
@@ -106,7 +106,7 @@ sub new_presorted {
 
 =head1 MODIFYING
 
-TODO
+Currently unsupported. Inserting or deleting would take O(n) time.
 
 =cut
 
@@ -123,9 +123,10 @@ TODO
 
 =cut
 
+# helper function that overload points to
 sub _as_string { shift->as_string(@_) }
 
-sub as_string { return '(' . join( ' ', @{ $_[0]->_members } ) . ')' }
+sub as_string { return '(' . join( ' ', @{ $_[0] } ) . ')' }
 
 sub as_string_callback {
     my ( $class, $callback ) = @_;
@@ -143,7 +144,6 @@ sub as_string_callback {
 =cut
 
 sub members  { return @{ $_[0] } }
-sub _members { return $_[0] }               # return arrayref of members
 sub size     { return scalar @{ $_[0] } }
 
 =head1 DERIVING
@@ -158,10 +158,10 @@ sub size     { return scalar @{ $_[0] } }
 =cut
 
 sub union {
-    pop unless ( UNIVERSAL::can( $_[-1], '_members' ) );
+    pop if ( ( @_ == 3 ) && ( !UNIVERSAL::isa( $_[2], __PACKAGE__ ) ) );
 
     my %members;
-    foreach my $set ( map { $_->_members } @_ ) {
+    foreach my $set ( @_ ) {
         foreach my $member (@$set) {
             $members{$member} ||= $member;
         }
@@ -181,14 +181,14 @@ sub union {
 =cut
 
 sub intersection {
-    pop unless ( UNIVERSAL::can( $_[-1], '_members' ) );
+    pop if ( ( @_ == 3 ) && ( !UNIVERSAL::isa( $_[2], __PACKAGE__ ) ) );
 
     my $total = @_;
 
     my %members;
     my %counts;
 
-    foreach my $set ( map { $_->_members } @_ ) {
+    foreach my $set ( @_ ) {
         foreach my $member (@$set) {
             $members{$member} ||= $member;
             $counts{$member}++;
@@ -209,7 +209,7 @@ sub intersection {
 =cut
 
 sub difference {
-    my ( $this, $that ) = map { $_->_members } @_[ 0, 1 ];
+    my ( $this, $that ) = @_;
 
     my $i = 0;
     my $j = 0;
@@ -240,7 +240,7 @@ sub difference {
 =cut
 
 sub symmetric_difference {
-    my ( $this, $that ) = map { $_->_members } @_[ 0, 1 ];
+    my ( $this, $that ) = @_;
 
     my $i = 0;
     my $j = 0;
@@ -260,7 +260,6 @@ sub symmetric_difference {
 
     my $class = ref($this);
     bless $difference, $class;
-
     return $difference;
 }
 
@@ -273,7 +272,7 @@ Returns [ $s - $t, $t - $s ], but more efficiently.
 =cut
 
 sub asymmetric_difference {
-    my ( $this, $that ) = map { $_->_members } @_[ 0, 1 ];
+    my ( $this, $that ) = @_;
 
     my $i = 0;
     my $j = 0;
@@ -287,7 +286,6 @@ sub asymmetric_difference {
         elsif ( $member_i lt $member_j ) { push @$difference, $member_i; $i++ }
         else                             { push @$add,        $member_j; $j++ }
     }
-
     push @$difference, @$this[ $i .. $#$this ];
     push @$add,        @$that[ $j .. $#$that ];
 
@@ -306,12 +304,12 @@ sub asymmetric_difference {
 =cut
 
 sub unique {
-    pop unless ( UNIVERSAL::can( $_[-1], '_members' ) );
+    pop if ( ( @_ == 3 ) && ( !UNIVERSAL::isa( $_[2], __PACKAGE__ ) ) );
 
     my %members;
     my %counts;
 
-    foreach my $set ( map { $_->_members } @_ ) {
+    foreach my $set ( @_ ) {
         foreach my $member (@$set) {
             $counts{$member}++;
         }
@@ -333,7 +331,7 @@ sub unique {
 =cut
 
 sub is_equal {
-    my ( $this, $that ) = map { $_->_members } @_[ 0, 1 ];
+    my ( $this, $that ) = @_;
     return unless ( @$this == @$that );
     return _is_equal( $this, $that );
 }
@@ -354,7 +352,7 @@ sub _is_equal {
 =cut
 
 sub is_disjoint {
-    my ( $this, $that ) = map { $_->_members } @_[ 0, 1 ];
+    my ( $this, $that ) = @_;
 
     my $i = 0;
     my $j = 0;
@@ -394,25 +392,25 @@ sub is_disjoint {
 =cut
 
 sub is_proper_subset {
-    my ( $this, $that ) = map { $_->_members } @_[ 0, 1 ];
+    my ( $this, $that ) = @_;
     return unless ( @$this < @$that );
     return _is_subset( $this, $that );
 }
 
 sub is_proper_superset {
-    my ( $this, $that ) = map { $_->_members } @_[ 0, 1 ];
+    my ( $this, $that ) = @_;
     return unless ( @$this > @$that );
     return _is_subset( $that, $this );
 }
 
 sub is_subset {
-    my ( $this, $that ) = map { $_->_members } @_[ 0, 1 ];
+    my ( $this, $that ) = @_;
     return unless ( @$this <= @$that );
     return _is_subset( $this, $that );
 }
 
 sub is_superset {
-    my ( $this, $that ) = map { $_->_members } @_[ 0, 1 ];
+    my ( $this, $that ) = @_;
     return unless ( @$this >= @$that );
     return _is_subset( $that, $this );
 }
@@ -450,7 +448,7 @@ C<compare> returns:
 =cut
 
 sub compare {
-    my ( $this, $that ) = map { $_->_members } @_[ 0, 1 ];
+    my ( $this, $that ) = @_;
 
     if ( my $cmp = $#$this <=> $#$that ) {
         return $cmp == 1
