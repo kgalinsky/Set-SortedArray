@@ -549,7 +549,7 @@ L<http://search.cpan.org/dist/Set-SortedArray/>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2011 "Kevin Galinsky".
+Copyright 2011-2012 "Kevin Galinsky".
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of either: the GNU General Public License as published
