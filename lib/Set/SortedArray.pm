@@ -13,7 +13,7 @@ Version 0.02
 
 =cut
 
-our $VERSION = qv('0.02');
+our $VERSION = '0.02';
 
 =head1 SYNOPSIS
 
@@ -64,7 +64,7 @@ unsupported.
 
 use overload
   '""'  => \&_as_string,
-  '+'   => \&union,
+  '+'   => \&merge,
   '*'   => \&intersection,
   '-'   => \&difference,
   '%'   => \&symmetric_difference,
@@ -160,6 +160,8 @@ sub size    { return scalar @{ $_[0] } }
 sub union {
     pop if ( ( @_ == 3 ) && ( !UNIVERSAL::isa( $_[2], __PACKAGE__ ) ) );
 
+    return $_[0]->merge( $_[1] ) if ( @_ == 2 );
+
     my %members;
     foreach my $set (@_) {
         foreach my $member (@$set) {
@@ -169,6 +171,37 @@ sub union {
 
     my $union = bless [ sort values %members ], ref( $_[0] );
     return $union;
+}
+
+=head2 merge
+
+    $U = $S->merge($T);
+    $U = $S + $T;
+
+Special case of union where only two sets are considered. "+" is actually
+overloaded to merge, not union. Named merge since this is essentially the
+"merge" step of a mergesort.
+
+=cut
+
+sub merge {
+    my ( $S, $T ) = @_;
+    my ( $i, $j ) = ( 0, 0 );
+    my $U = [];
+
+    while ( ( $i < @$S ) && ( $j < @$T ) ) {
+        my $s_i = $S->[$i];
+        my $t_j = $T->[$j];
+
+        if ( $s_i eq $t_j ) { push @$U, $s_i; $i++; $j++ }
+        elsif ( $s_i lt $t_j ) { push @$U, $s_i; $i++ }
+        else                   { push @$U, $t_j; $j++ }
+    }
+
+    push @$U, @$S[ $i .. $#$S ];
+    push @$U, @$T[ $j .. $#$T ];
+
+    return bless $U, ref($S);
 }
 
 =head2 intersection
