@@ -8,14 +8,46 @@ $a = Set::SortedArray->new(qw/ a b c     /);
 $b = Set::SortedArray->new(qw/   b c d   /);
 $c = Set::SortedArray->new(qw/     c d e /);
 
-is( $a->union($b)->size, 4, 'union ab' );
-is( $a->union( $b, $c )->size, 5, 'union abc' );
+is_deeply(
+    $a->union($b),    #
+    Set::SortedArray->new_presorted(qw/ a b c d /),
+    'union ab'
+);
+is_deeply(
+    $a->union( $b, $c ),    #
+    Set::SortedArray->new_presorted(qw/ a b c d e /),
+    'union abc'
+);
 
-is( $a->intersection($b)->size, 2, 'intersection ab' );
-is( $a->intersection( $b, $c )->size, 1, 'intersection abc' );
+is_deeply(
+    $a->intersection($b),    #
+    Set::SortedArray->new_presorted(qw/ b c /),
+    'intersection ab'
+);
+is_deeply(
+    $a->intersection( $b, $c ),    #
+    Set::SortedArray->new_presorted(qw/ c /),
+    'intersection abc'
+);
 
-is($a->difference($b)->size, 1, 'a - b');
-is($a->difference($c)->size, 2, 'a - c');
+is_deeply(
+    $a->difference($b),            #
+    Set::SortedArray->new(qw/ a /),
+    'a - b'
+);
+is_deeply(
+    $a->difference($c),            #
+    Set::SortedArray->new(qw/ a b /),
+    'a - c'
+);
 
-is($a->symmetric_difference($b)->size, 2, 'a % b');
-is($a->symmetric_difference($c)->size, 4, 'a % c');
+is_deeply(
+    $a->symmetric_difference($b),    #
+    Set::SortedArray->new(qw/ a d /),
+    'a % b'
+);
+is_deeply(
+    $a->symmetric_difference($c),    #
+    Set::SortedArray->new(qw/ a b d e /),
+    'a % c'
+);
