@@ -268,26 +268,21 @@ sub binary_intersection {
 
 sub difference {
     my ( $S, $T ) = @_;
+    my ( $i, $j ) = ( 0, 0 );
+    my $D = [];
 
-    my $i = 0;
-    my $j = 0;
-
-    my $difference = [];
     while ( ( $i < @$S ) && ( $j < @$T ) ) {
         my $s_i = $S->[$i];
         my $t_j = $T->[$j];
 
         if ( $s_i eq $t_j ) { $i++; $j++ }
-        elsif ( $s_i lt $t_j ) { push @$difference, $s_i; $i++ }
+        elsif ( $s_i lt $t_j ) { push @$D, $s_i; $i++ }
         else                   { $j++ }
     }
 
-    push @$difference, @$S[ $i .. $#$S ];
+    push @$D, @$S[ $i .. $#$S ];
 
-    my $class = ref($S);
-    bless $difference, $class;
-
-    return $difference;
+    return bless $D, ref($S);
 }
 
 =head2 symmetric_difference
@@ -299,26 +294,22 @@ sub difference {
 
 sub symmetric_difference {
     my ( $S, $T ) = @_;
+    my ( $i, $j ) = ( 0, 0 );
+    my $E = [];
 
-    my $i = 0;
-    my $j = 0;
-
-    my $difference = [];
     while ( ( $i < @$S ) && ( $j < @$T ) ) {
         my $s_i = $S->[$i];
         my $t_j = $T->[$j];
 
         if ( $s_i eq $t_j ) { $i++; $j++ }
-        elsif ( $s_i lt $t_j ) { push @$difference, $s_i; $i++ }
-        else                   { push @$difference, $t_j; $j++ }
+        elsif ( $s_i lt $t_j ) { push @$E, $s_i; $i++ }
+        else                   { push @$E, $t_j; $j++ }
     }
 
-    push @$difference, @$S[ $i .. $#$S ];
-    push @$difference, @$T[ $j .. $#$T ];
+    push @$E, @$S[ $i .. $#$S ];
+    push @$E, @$T[ $j .. $#$T ];
 
-    my $class = ref($S);
-    bless $difference, $class;
-    return $difference;
+    return bless $E, ref($S);
 }
 
 =head2 asymmetric_difference
@@ -331,27 +322,27 @@ Returns [ $S - $T, $T - $S ], but more efficiently.
 
 sub asymmetric_difference {
     my ( $S, $T ) = @_;
+    my ( $i, $j ) = ( 0, 0 );
 
-    my $i = 0;
-    my $j = 0;
+    # $D = $S - $T, $B = $T - $S
+    # "B" chosen because "b" looks like mirror of "d"
+    my ( $D, $B ) = ( [], [] );
 
-    my ( $difference, $add ) = ( [], [] );
     while ( ( $i < @$S ) && ( $j < @$T ) ) {
         my $s_i = $S->[$i];
         my $t_j = $T->[$j];
 
         if ( $s_i eq $t_j ) { $i++; $j++ }
-        elsif ( $s_i lt $t_j ) { push @$difference, $s_i; $i++ }
-        else                   { push @$add,        $t_j; $j++ }
+        elsif ( $s_i lt $t_j ) { push @$D, $s_i; $i++ }
+        else                   { push @$B, $t_j; $j++ }
     }
-    push @$difference, @$S[ $i .. $#$S ];
-    push @$add,        @$T[ $j .. $#$T ];
+    push @$D, @$S[ $i .. $#$S ];
+    push @$B, @$T[ $j .. $#$T ];
 
     my $class = ref($S);
-    bless $difference, $class;
-    bless $add,        $class;
-
-    return [ $difference, $add ];
+    bless $D, $class;
+    bless $B, $class;
+    return [ $D, $B ];
 }
 
 =head2 unique
