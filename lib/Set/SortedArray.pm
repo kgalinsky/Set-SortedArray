@@ -158,8 +158,6 @@ sub size    { return scalar @{ $_[0] } }
 =cut
 
 sub union {
-    pop if ( ( @_ == 3 ) && ( !UNIVERSAL::isa( $_[2], __PACKAGE__ ) ) );
-
     return $_[0]->merge( $_[1] ) if ( @_ == 2 );
 
     my %members;
