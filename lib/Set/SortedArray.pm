@@ -65,7 +65,7 @@ unsupported.
 use overload
   '""'  => \&_as_string,
   '+'   => \&merge,
-  '*'   => \&intersection,
+  '*'   => \&binary_intersection,
   '-'   => \&difference,
   '%'   => \&symmetric_difference,
   '/'   => \&unique,
@@ -212,7 +212,7 @@ sub merge {
 =cut
 
 sub intersection {
-    pop if ( ( @_ == 3 ) && ( !UNIVERSAL::isa( $_[2], __PACKAGE__ ) ) );
+    return $_[0]->binary_intersection( $_[1] ) if ( @_ == 2 );
 
     my $total = @_;
 
@@ -230,6 +230,33 @@ sub intersection {
       bless [ sort grep { $counts{$_} == $total } values %members ],
       ref $_[0];
     return $intersection;
+}
+
+=head2 binary_intersection
+
+    $I = $S->binary_intersection($T);
+    $I = $S * $T;
+
+Special case of intersection where only two sets are considered. "*" is
+actually overloaded to binary_intersection, not intersection.
+
+=cut
+
+sub binary_intersection {
+    my ( $S, $T ) = @_;
+    my ( $i, $j ) = ( 0, 0 );
+    my $I = [];
+
+    while ( ( $i < @$S ) && ( $j < @$T ) ) {
+        my $s_i = $S->[$i];
+        my $t_j = $T->[$j];
+
+        if ( $s_i eq $t_j ) { push @$I, $s_i; $i++; $j++ }
+        elsif ( $s_i lt $t_j ) { $i++ }
+        else                   { $j++ }
+    }
+
+    return bless $I, ref($S);
 }
 
 =head2 difference
